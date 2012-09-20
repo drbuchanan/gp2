@@ -62,7 +62,7 @@ bool CGameApplication::initGame()
 
 		D3D10_BUFFER_DESC bd;
 		bd.Usage=D3D10_USAGE_DEFAULT;
-		bd.ByteWidth=sizeof(Vertex)*4;
+		bd.ByteWidth=sizeof(Vertex)*3;
 		bd.BindFlags=D3D10_BIND_VERTEX_BUFFER;
 		bd.CPUAccessFlags=0;
 		bd.MiscFlags=0;
@@ -75,10 +75,10 @@ bool CGameApplication::initGame()
 
 		Vertex vertices[] = 
 	{
+		D3DXVECTOR3(0.0f,0.5f,0.5f),
+		D3DXVECTOR3(0.5f,-0.5f,0.5f),
 		D3DXVECTOR3(-0.5f,-0.5f,0.5f),
-		D3DXVECTOR3(-0.5f,-0.5f,0.5f),
-		D3DXVECTOR3(-0.5f,-0.5f,0.5f),
-		D3DXVECTOR3(-0.5f,-0.5f,0.5),
+
 	};
 
 	D3D10_SUBRESOURCE_DATA InitData;
@@ -108,7 +108,7 @@ bool CGameApplication::initGame()
 		m_pD3D10Device->IASetVertexBuffers(0,1,
 			&m_pVertexBuffer,&stride,&offset);
 
-		m_pD3D10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		m_pD3D10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		return true;
 	}
@@ -149,7 +149,7 @@ void CGameApplication::render()
 	for(UINT p = 0; p< techDesc.Passes; ++p)
 	{
 		m_pTechnique->GetPassByIndex(p)->Apply(0);
-		m_pD3D10Device->Draw(4,0);
+		m_pD3D10Device->Draw(3,0);
 	}
 	m_pSwapChain->Present(0,0);
 }

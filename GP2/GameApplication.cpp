@@ -1,6 +1,9 @@
 #include "GameApplication.h"
 
-
+struct Vertex
+{
+	D3DXVECTOR3 Pos;
+};
 
 CGameApplication::CGameApplication(void)
 {
@@ -18,6 +21,10 @@ CGameApplication::~CGameApplication(void)
 		m_pD3D10Device->ClearState();
 	if(m_pVertexBuffer)
 		m_pVertexBuffer->Release(); 
+	if(m_pVertexLayout)
+		m_pVertexLayout->Release();
+	if(m_pEffect)
+		m_pEffect->Release();
 	if(m_pRenderTargetView)
 		m_pRenderTargetView->Release();
 	if(m_pSwapChain)
@@ -32,10 +39,79 @@ CGameApplication::~CGameApplication(void)
 
 }
 
-struct Vertex
-{
-	D3DXVECTOR3 Pos;
-}
+bool CGameApplication::initGame()
+	{
+				DWORD dwShaderFlags = D3D10_SHADER_ENABLE_STRICTNESS;
+#if defined(DEBUG) || defined(_DEBUG)
+		dwShaderFlags |= D3D10_SHADER_DEBUG;
+#endif
+
+		ID3D10Blob* pErrors = NULL;
+		if(FAILED(D3DX10CreateEffectFromFile(TEXT("ScreenSpace.fx"),
+			NULL, NULL, "fx_4_0", dwShaderFlags, 0,
+			m_pD3D10Device, NULL, NULL, &m_pEffect,
+			&pErrors, NULL)))
+		{
+			MessageBoxA( NULL,(char*)pErrors->GetBufferPointer(),
+				"Error",
+				MB_OK);
+			return false;
+		}
+
+		m_pTechnique=m_pEffect->GetTechniqueByName("Render");
+
+		D3D10_BUFFER_DESC bd;
+		bd.Usage=D3D10_USAGE_DEFAULT;
+		bd.ByteWidth=sizeof(Vertex)*4;
+		bd.BindFlags=D3D10_BIND_VERTEX_BUFFER;
+		bd.CPUAccessFlags=0;
+		bd.MiscFlags=0;
+
+		D3D10_INPUT_ELEMENT_DESC layout[] =
+		{
+			{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+			D3D10_INPUT_PER_VERTEX_DATA, 0},
+		};
+
+		Vertex vertices[] = 
+	{
+		D3DXVECTOR3(-0.5f,-0.5f,0.5f),
+		D3DXVECTOR3(-0.5f,-0.5f,0.5f),
+		D3DXVECTOR3(-0.5f,-0.5f,0.5f),
+		D3DXVECTOR3(-0.5f,-0.5f,0.5),
+	};
+
+	D3D10_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = vertices;
+
+	if(FAILED(m_pD3D10Device->CreateBuffer(&bd, &InitData,
+		&m_pVertexBuffer)))
+		return false;
+
+		UINT numElements = sizeof(layout)/sizeof(D3D10_INPUT_ELEMENT_DESC);
+		D3D10_PASS_DESC PassDesc;
+		m_pTechnique->GetPassByIndex(0)->GetDesc(&PassDesc);
+
+		if(FAILED(m_pD3D10Device->CreateInputLayout(layout,
+			numElements,
+			PassDesc.pIAInputSignature,
+			PassDesc.IAInputSignatureSize,
+			&m_pVertexLayout)))
+		{
+			return false;
+		}
+
+		m_pD3D10Device->IASetInputLayout(m_pVertexLayout);
+
+		UINT stride = sizeof(Vertex);
+		UINT offset = 0;
+		m_pD3D10Device->IASetVertexBuffers(0,1,
+			&m_pVertexBuffer,&stride,&offset);
+
+		m_pD3D10Device->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+		return true;
+	}
 
 bool CGameApplication::init()
 {
@@ -45,13 +121,6 @@ bool CGameApplication::init()
 		return false;
 	if(!initGame())
 	{
-		D3D10_BUFFER_DESC bd;
-		bd.Usage=D3D10_USAGE_DEFAULT;
-		bd.ByteWidth=sizeof(Vertex)*3;
-		bd.BindFlags=D3D10_BIND_VERTEX_BUFFER;
-		bd.CPUAccessFlags=0;
-		bd.MiscFlags=0;
-
 		return false;
 	}
 	return true;
@@ -70,7 +139,19 @@ void CGameApplication::run()
 }
 
 void CGameApplication::render()
-{
+	{
+	float ClearColor[4] = {0.6f, 0.125f, 0.0, 1.0f};
+	m_pD3D10Device->ClearRenderTargetView(m_pRenderTargetView,
+		ClearColor);
+
+	D3D10_TECHNIQUE_DESC techDesc;
+	m_pTechnique->GetDesc(&techDesc);
+	for(UINT p = 0; p< techDesc.Passes; ++p)
+	{
+		m_pTechnique->GetPassByIndex(p)->Apply(0);
+		m_pD3D10Device->Draw(4,0);
+	}
+	m_pSwapChain->Present(0,0);
 }
 
 void CGameApplication::update()
@@ -111,19 +192,7 @@ bool CGameApplication::initGraphics()
 	sd.BufferDesc.RefreshRate.Numerator = 60;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
 
-	Vertex vertices[] = 
-	{
-		D3DXVECTOR3(0.0f,0.5f,0.5f),
-		D3DXVECTOR3(0.5f,-0.5f,0.5f),
-		D3DXVECTOR3(-0.5f,-0.5f,0.5f),
-	};
-
-	D3D10_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = vertices;
-
-	if(FAILED(m_pD3D10Device->CreateBuffer(&bd, &InitData,
-		&m_pVertexBuffer)))
-		return false;
+	
 
 	if(FAILED(D3D10CreateDeviceAndSwapChain(NULL, D3D10_DRIVER_TYPE_HARDWARE, NULL, createDeviceFlags,
 		D3D10_SDK_VERSION, &sd,&m_pSwapChain,

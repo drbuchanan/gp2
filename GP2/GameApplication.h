@@ -33,6 +33,7 @@ private:
 	ID3D10InputLayout*m_pVertexLayout;
 	ID3D10Effect*m_pEffect;
 	ID3D10EffectTechnique*m_pTechnique;
+	//Creates a new buffer called Index Buffer
 	ID3D10Buffer*m_pIndexBuffer;
 
 	ID3D10EffectShaderResourceVariable*m_pDiffuseTextureVariable;

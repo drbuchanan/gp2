@@ -32,7 +32,7 @@ CGameApplication::~CGameApplication(void)
 	if(m_pRenderTargetView)
 		m_pRenderTargetView->Release();
 	if(m_pDepthStencilTexture)
-		m_pDepthStencilView->Release();
+		m_pDepthStencilTexture->Release();
 	if(m_pDepthStencilView)
 		m_pDepthStencilView->Release();
 	if(m_pSwapChain)
@@ -70,7 +70,7 @@ bool CGameApplication::initGame()
 
 		D3D10_BUFFER_DESC bd;
 		bd.Usage=D3D10_USAGE_DEFAULT;
-		bd.ByteWidth=sizeof(Vertex)*3;
+		bd.ByteWidth=sizeof(Vertex)*8;
 		bd.BindFlags=D3D10_BIND_VERTEX_BUFFER;
 		bd.CPUAccessFlags=0;
 		bd.MiscFlags=0;
@@ -83,10 +83,14 @@ bool CGameApplication::initGame()
 
 		Vertex vertices[] = 
 	{
+		D3DXVECTOR3(0.0f,0.0f,0.5f),
+		D3DXVECTOR3(0.5f,0.0f,0.5f),
+		D3DXVECTOR3(0.5f,0.5f,0.5f),
 		D3DXVECTOR3(0.0f,0.5f,0.5f),
-		D3DXVECTOR3(0.5f,-0.5f,0.5f),
-		D3DXVECTOR3(-0.5f,-0.5f,0.5f),
-
+		D3DXVECTOR3(0.0f,0.0f,1.0f),
+		D3DXVECTOR3(0.5f,0.0f,1.0f),
+		D3DXVECTOR3(0.5f,0.5f,1.0f),
+		D3DXVECTOR3(0.0f,0.5f,1.0f),
 	};
 
 	D3D10_SUBRESOURCE_DATA InitData;
@@ -119,14 +123,15 @@ bool CGameApplication::initGame()
 	//Created Index Buffer description
 		D3D10_BUFFER_DESC iBD;
 		iBD.Usage=D3D10_USAGE_DEFAULT;
-		iBD.ByteWidth=sizeof(int)*3;
+		iBD.ByteWidth=sizeof(int)*36;
 		iBD.BindFlags=D3D10_BIND_INDEX_BUFFER;
 		iBD.CPUAccessFlags=0;
 		iBD.MiscFlags=0;
 
-		//An Index Buffer needs Indices, this creates an array of integers called indices
-		int indices[] = {0,1,2};
+		//Creates an array of integers called indices
+		int indices[] = {0,1,2,0,2,3,4,5,6,4,6,7,0,1,5,0,5,4,3,2,6,3,6,7,1,5,6,1,6,2,0,4,7,0,4,3};
 
+		//
 		D3D10_SUBRESOURCE_DATA iBDInitData;
 		iBDInitData.pSysMem = indices;
 
@@ -136,6 +141,7 @@ bool CGameApplication::initGame()
 			return false;
 
 		//Binds the buffer to the pipeline by setting the Index Buffer
+		//Takes 3 parameters which point to an ID3D10 Buffer, 
 		m_pD3D10Device->IASetIndexBuffer(m_pIndexBuffer, 
 			DXGI_FORMAT_R32_UINT, 0);
 
@@ -210,13 +216,16 @@ void CGameApplication::render()
 	for(UINT p = 0; p< techDesc.Passes; ++p)
 	{
 		m_pTechnique->GetPassByIndex(p)->Apply(0);
-		m_pD3D10Device->DrawIndexed(3,0,0);
+		m_pD3D10Device->DrawIndexed(36,0,0);
 	}
 	m_pSwapChain->Present(0,0);
 }
 
 void CGameApplication::update()
 {
+
+	m_vecRotation.y+=0.0005f;
+	m_vecRotation.x+=0.0005f;
 	D3DXMatrixScaling(&m_matScale,m_vecScale.x,m_vecScale.y,m_vecScale.z);
 
 	D3DXMatrixRotationYawPitchRoll(&m_matRotation,m_vecRotation.y,m_vecRotation.x,m_vecRotation.z);
@@ -321,10 +330,6 @@ bool CGameApplication::initGraphics()
 	vp.TopLeftY = 0;
 	m_pD3D10Device->RSSetViewports(1, &vp);
 
-	float ClearColor[4] = {0.0f, 0.125f, 0.3f, 1.0f};
-	m_pD3D10Device->ClearRenderTargetView(m_pRenderTargetView,
-												ClearColor);
-	m_pSwapChain->Present(0,0);
 
 	return true;
 }

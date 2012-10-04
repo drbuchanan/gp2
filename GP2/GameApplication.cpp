@@ -3,6 +3,7 @@
 struct Vertex
 {
 	D3DXVECTOR3 Pos;
+	D3DXCOLOR colour;
 };
 
 CGameApplication::CGameApplication(void)
@@ -79,18 +80,20 @@ bool CGameApplication::initGame()
 		{
 			{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
 			D3D10_INPUT_PER_VERTEX_DATA, 0},
+			{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
+			D3D10_INPUT_PER_VERTEX_DATA, 0},
 		};
 
 		Vertex vertices[] = 
 	{
-		D3DXVECTOR3(0.0f,0.0f,0.5f),
-		D3DXVECTOR3(0.5f,0.0f,0.5f),
-		D3DXVECTOR3(0.5f,0.5f,0.5f),
-		D3DXVECTOR3(0.0f,0.5f,0.5f),
-		D3DXVECTOR3(0.0f,0.0f,1.0f),
-		D3DXVECTOR3(0.5f,0.0f,1.0f),
-		D3DXVECTOR3(0.5f,0.5f,1.0f),
-		D3DXVECTOR3(0.0f,0.5f,1.0f),
+		{D3DXVECTOR3(0.0f,0.0f,0.5f),D3DXCOLOR(1.0f,0.5f,0.5f,1.0f)},
+		{D3DXVECTOR3(0.5f,0.0f,0.5f),D3DXCOLOR(0.3f,0.5f,0.5f,1.0f)},
+		{D3DXVECTOR3(0.5f,0.5f,0.5f),D3DXCOLOR(0.7f,0.5f,0.7f,1.0f)},
+		{D3DXVECTOR3(0.0f,0.5f,0.5f),D3DXCOLOR(0.0f,0.0f,0.5f,1.0f)},
+		{D3DXVECTOR3(0.0f,0.0f,1.0f),D3DXCOLOR(1.0f,1.0f,0.1f,1.0f)},
+		{D3DXVECTOR3(0.5f,0.0f,1.0f),D3DXCOLOR(0.5f,0.5f,0.5f,1.0f)},
+		{D3DXVECTOR3(0.5f,0.5f,1.0f),D3DXCOLOR(0.8f,0.7f,0.6f,1.0f)},
+		{D3DXVECTOR3(0.0f,0.5f,1.0f),D3DXCOLOR(0.6f,0.7f,0.8f,1.0f)},
 	};
 
 	D3D10_SUBRESOURCE_DATA InitData;

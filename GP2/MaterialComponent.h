@@ -55,18 +55,20 @@ public:
 
 	void loadDiffuseTexture(const string& filename);
 
+	void loadSpecularTexture(const string& filename);
+
 	void setTextures()
 	{
-		if(m_pSpecularTexture!=NULL)
-		{
-			m_pUseSpecularTextureVariable->SetBool(true);
-			m_pSpecularTextureVariable->SetResource(m_pSpecularTexture);
-		}
-
 		if(m_pDiffuseTexture!=NULL)
 		{
 			m_pUseDiffuseTextureVariable->SetBool(true);
 			m_pDiffuseTextureVariable->SetResource(m_pDiffuseTexture);
+		}
+
+		if(m_pSpecularTexture!=NULL)
+		{
+			m_pUseSpecularTextureVariable->SetBool(true);
+			m_pSpecularTextureVariable->SetResource(m_pSpecularTexture);
 		}
 	};
 	//set the world matrix

@@ -8,6 +8,7 @@ CMaterialComponent::CMaterialComponent()
 	m_pEffect=NULL;
 	m_pVertexLayout=NULL;
 	m_pDiffuseTexture=NULL;
+	m_pSpecularTexture=NULL;
 	m_EffectName="";
 	m_TechniqueName="Render";
 	ZeroMemory(&m_TechniqueDesc,sizeof(D3D10_TECHNIQUE_DESC));
@@ -15,7 +16,7 @@ CMaterialComponent::CMaterialComponent()
 
 	m_DiffuseMaterial=D3DXCOLOR(0.8f,0.8f,0.8f,1.0f);
 	m_AmbientMaterial=D3DXCOLOR(0.5f,0.5f,0.5f,1.0f);
-	m_SpecularMaterial=D3DXCOLOR(1.0f,1.0f,1.0f,1.0f);
+	m_SpecularMaterial=D3DXCOLOR(0.5f,1.0f,0.3f,1.0f);
 	m_SpecularPower=25.0f;
 }
 
@@ -26,6 +27,12 @@ CMaterialComponent::~CMaterialComponent()
 	{
 		m_pDiffuseTexture->Release();
 		m_pDiffuseTexture=NULL;
+	}
+
+	if(m_pSpecularTexture)
+	{
+		m_pSpecularTexture->Release();
+		m_pSpecularTexture=NULL;
 	}
 	//vertex layout
 	if (m_pVertexLayout)
@@ -117,6 +124,14 @@ void CMaterialComponent::loadDiffuseTexture(const string& filename)
 	}
 }
 
+void CMaterialComponent::loadSpecularTexture(const string& filename)
+{
+	if (FAILED(D3DX10CreateShaderResourceViewFromFileA(m_pD3D10Device,
+		filename.c_str(), NULL, NULL,&m_pSpecularTexture , NULL)))
+	{
+		OutputDebugStringA("Can't load Texture");
+	}
+}
 //init
 void CMaterialComponent::init()
 {
@@ -141,6 +156,8 @@ void CMaterialComponent::init()
 	m_pViewMatrixVariable=m_pEffect->GetVariableBySemantic("VIEW")->AsMatrix();
 	m_pProjectionMatrixVariable=m_pEffect->GetVariableBySemantic("PROJECTION")->AsMatrix();
 	m_pDiffuseTextureVariable=m_pEffect->GetVariableByName("diffuseMap")->AsShaderResource();
+	m_pSpecularTextureVariable=m_pEffect->GetVariableByName("specularMap")->AsShaderResource();
+
 
 	//lights
 	m_pAmbientLightColourVariable=m_pEffect->GetVariableByName("ambientLightColour")->AsVector();

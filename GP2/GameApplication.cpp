@@ -74,6 +74,7 @@ bool CGameApplication::initGame()
 	pMaterial->SetRenderingDevice(m_pD3D10Device);
 	pMaterial->setEffectFilename("DirectionalLight.fx");
 	pMaterial->setAmbientMaterialColour(D3DXCOLOR(0.5f,0.5f,0.5f,1.0f));
+	pMaterial->setSpecularMaterialColour(D3DXCOLOR(0.0f,0.0f,0.0f,1.0f));
 	pMaterial->loadDiffuseTexture("armoredrecon_diff.png");
 	pTestGameObject->addComponent(pMaterial);
 	
@@ -89,12 +90,18 @@ bool CGameApplication::initGame()
 	//2nd Instance of Armored Recon
 	CGameObject *pTestGameObject1=new CGameObject();
 
+	pTestGameObject1->setName("Armored");
+
 	pTestGameObject1->getTransform()->setPosition(3.0f,0.0f,10.0f);
 
 	CMaterialComponent *pMaterial1=new CMaterialComponent();
 	pMaterial1->SetRenderingDevice(m_pD3D10Device);
-	pMaterial1->setEffectFilename("Specular.fx");
+	pMaterial1->setEffectFilename("DirectionalLight.fx");
 	pMaterial1->setAmbientMaterialColour(D3DXCOLOR(0.5f,0.5,0.5f,1.0f));
+	pMaterial1->setSpecularMaterialColour(D3DXCOLOR(1.0f,1.0,1.0f,1.0f));
+	pMaterial1->setSpecularPower(50.0f);
+	pMaterial1->loadDiffuseTexture("armoredrecon_diff.png");
+	pMaterial1->loadSpecularTexture("armoredrecon_spec.png");
 	pTestGameObject1->addComponent(pMaterial1);
 
 	CMeshComponent *pMesh1= modelloader.loadModelFromFile(m_pD3D10Device, "armoredrecon.fbx");
@@ -103,7 +110,7 @@ bool CGameApplication::initGame()
 
 	m_pGameObjectManager->addGameObject(pTestGameObject1);
 
-
+	//Creates the game camera
 	CGameObject *pCameraGameObject=new CGameObject();
 	pCameraGameObject->getTransform()->setPosition(0.0f,0.0f,-5.0f);
 	pCameraGameObject->setName("Camera");
@@ -250,6 +257,30 @@ void CGameApplication::update()
 	{
 		//play sound
 		CTransformComponent * pTransform=m_pGameObjectManager->findGameObject("Test")->getTransform();
+		pTransform->rotate(0.0f,m_Timer.getElapsedTime()*-1,0.0f);
+	}
+	else if (CInput::getInstance().getKeyboard()->isKeyDown((int)'I'))
+	{
+		//play sound
+		CTransformComponent * pTransform=m_pGameObjectManager->findGameObject("Armored")->getTransform();
+		pTransform->rotate(m_Timer.getElapsedTime(),0.0f,0.0f);
+	}
+	else if (CInput::getInstance().getKeyboard()->isKeyDown((int)'K'))
+	{
+		//play sound
+		CTransformComponent * pTransform=m_pGameObjectManager->findGameObject("Armored")->getTransform();
+		pTransform->rotate(m_Timer.getElapsedTime()*-1,0.0f,0.0f);
+	}
+	else if (CInput::getInstance().getKeyboard()->isKeyDown((int)'J'))
+	{
+		//play sound
+		CTransformComponent * pTransform=m_pGameObjectManager->findGameObject("Armored")->getTransform();
+		pTransform->rotate(0.0f,m_Timer.getElapsedTime(),0.0f);
+	}
+	else if (CInput::getInstance().getKeyboard()->isKeyDown((int)'L'))
+	{
+		//play sound
+		CTransformComponent * pTransform=m_pGameObjectManager->findGameObject("Armored")->getTransform();
 		pTransform->rotate(0.0f,m_Timer.getElapsedTime()*-1,0.0f);
 	}
 	m_pGameObjectManager->update(m_Timer.getElapsedTime());
